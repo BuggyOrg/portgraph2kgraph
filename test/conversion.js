@@ -36,4 +36,13 @@ describe('Convert Port Graph to KGraph', () => {
     expect(kGraph.children[0]).to.be.an('object')
     expect(kGraph.children[0].children).to.have.length(1)
   })
+
+  it('Converts edges correctly', () => {
+    var kGraph = convert(Graph.flow(
+      Graph.addNode({name: 'a', ports: [{port: 'a', kind: 'output'}]}),
+      Graph.addNode({name: 'b', ports: [{port: 'b', kind: 'input'}]}),
+      Graph.addEdge({from: 'a@a', to: 'b@b'})
+    )())
+    expect(kGraph.edges).to.have.length(1)
+  })
 })

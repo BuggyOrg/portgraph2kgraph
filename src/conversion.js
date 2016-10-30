@@ -3,12 +3,18 @@ import * as Graph from '@buggyorg/graphtools'
 import _ from 'lodash'
 
 const Node = Graph.Node
+const Port = Graph.Port
 
-export function convertPort (nodeName, type, port, portType) {
+function convertPortKind (kind) {
+  if (kind === 'output') return 'out'
+  else if (kind === 'input') return 'in'
+}
+
+export function convertPort (port) {
   return {
-    id: nodeName + '_' + port + '_' + portType,
+    id: Port.node(port) + '_' + Port.portName(port) + '_' + convertPortKind(Port.kind(port)),
     meta: {
-      type: type,
+      type: Port.type(port),
       name: port
     }
   }
@@ -17,62 +23,29 @@ export function convertPort (nodeName, type, port, portType) {
 export function convertEdge (graph, edge) {
   var sourceHierarchy = false
   var targetHierarchy = false
-  if (graph.parent(edge.v) === edge.w) {
+  if (Node.equal(Graph.parent(edge.from, graph), edge.to)) {
     sourceHierarchy = true
-  } else if (graph.parent(edge.w) === edge.v) {
+  } else if (Node.equal(Graph.parent(edge.from, graph), edge.to)) {
     targetHierarchy = true
-  } else if (edge.v === edge.w) {
+  } else if (Node.equal(edge.from, edge.to)) {
     sourceHierarchy = true
     targetHierarchy = true
   }
   return {
-    id: edge.v + edge.w,
-    source: edge.v,
-    sourcePort: edge.v + '_' + edge.value.outPort + ((targetHierarchy) ? '_in' : '_out'),
-    target: edge.w,
-    targetPort: edge.w + '_' + edge.value.inPort + ((sourceHierarchy) ? '_out' : '_in'),
+    id: Port.node(edge.from) + Port.node(edge.to),
+    source: Port.node(edge.from),
+    sourcePort: Port.node(edge.from) + '_' + Port.portName(edge.from) + ((targetHierarchy) ? '_in' : '_out'),
+    target: Port.node(edge.to),
+    targetPort: Port.node(edge.to) + '_' + Port.portName(edge.to) + ((sourceHierarchy) ? '_out' : '_in'),
     meta: {
-      sourceType: graph.node(edge.v)[(targetHierarchy) ? 'inputPorts' : 'outputPorts'][edge.value.outPort],
-      targetType: graph.node(edge.w)[(sourceHierarchy) ? 'outputPorts' : 'inputPorts'][edge.value.inPort],
-      sourceNode: edge.v,
-      sourcePort: edge.value.outPort,
-      targetNode: edge.w,
-      targetPort: edge.value.inPort,
+      sourceType: Graph.port(edge.from, graph).type,
+      targetType: Graph.port(edge.to, graph).type,
+      sourcePort: edge.from,
+      targetPort: edge.to,
+      layer: edge.layer,
       style: _.get(edge, 'value.meta.style')
     }
   }
-}
-
-export function convertEdges (graph, edges) {
-  return _.map(edges, _.partial(convertEdge, graph, _))
-}
-/*
-function combineNodes (graph, node, childMap, edgeMap) {
-  if (_.has(childMap, node.id)) {
-    node.children = _.map(childMap[node.id], _.partial(combineNodes, graph, _, childMap, edgeMap))
-  }
-  if (_.has(edgeMap, node.id)) {
-    node.edges = convertEdges(graph, edgeMap[node.id])
-  }
-  return node
-}
-*/
-var edgeParent = function (graph, edge) {
-  var outP = edge.v
-  var inP = edge.w
-  if (outP === inP) {
-    return outP
-  } else if (graph.parent(outP) === graph.parent(inP)) {
-    return graph.parent(outP)
-  } else if (graph.parent(outP) === inP) {
-    return inP
-  } else {
-    return outP
-  }
-}
-
-function setEdgeParent (edge, graph) {
-  return _.merge({}, edge, {parent: edgeParent(graph, edge)})
 }
 
 export function convertGraph (graph) {
@@ -80,7 +53,8 @@ export function convertGraph (graph) {
     .map(convertGraph)
     .value()
   var edges = _(Graph.edges(graph))
-    .map(_.partial(setEdgeParent, _, graph))
+    // .map(_.partial(setEdgeParent, _, graph))
+    .map(_.partial(convertEdge, graph))
     .value()
   return {
     id: graph.id,
