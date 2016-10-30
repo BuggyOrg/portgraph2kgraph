@@ -6,6 +6,10 @@ import convert from '../src/api'
 
 var expect = chai.expect
 
+const node = (name, kGraph) => {
+  return kGraph.children.filter((c) => c.labels[0].text === name)[0]
+}
+
 describe('Convert Port Graph to KGraph', () => {
   it('Can convert an empty Graph', () => {
     var kGraph = convert(Graph.empty())
@@ -44,5 +48,21 @@ describe('Convert Port Graph to KGraph', () => {
       Graph.addEdge({from: 'a@a', to: 'b@b'})
     )())
     expect(kGraph.edges).to.have.length(1)
+    expect(kGraph.edges[0].sourcePort).to.equal(node('a', kGraph).ports[0].id)
+    expect(kGraph.edges[0].targetPort).to.equal(node('b', kGraph).ports[0].id)
+  })
+
+  it('Converts edges in a compound node', () => {
+    var cmp = Graph.flow(
+      Graph.addNode({name: 'a', ports: [{port: 'a', kind: 'output'}]}),
+      Graph.addNode({name: 'b', ports: [{port: 'b', kind: 'input'}]}),
+      Graph.addEdge({from: 'a@a', to: 'b@b'})
+    )(Graph.compound({ports: [{port: 'b', kind: 'input'}]}))
+    var kGraph = convert(Graph.flow(
+      Graph.addNode(cmp)
+    )())
+    expect(kGraph.children).to.have.length(1)
+    expect(kGraph.children[0]).to.be.an('object')
+    expect(kGraph.children[0].edges).to.have.length(1)
   })
 })
