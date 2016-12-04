@@ -21,3 +21,7 @@ getStdin().then((graphString) => {
   var graph = fromJSON(JSON.parse(graphString))
   process.stdout.write(pp(convert(graph)))
 })
+.catch((err) => {
+  console.error('Error while processing graph.\n' + err)
+  process.exit(1)
+})

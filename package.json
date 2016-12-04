@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Converter for buggy port graphs into the kgraph format that can be used to create graph visualizations via KLay.",
   "main": "lib/api.js",
+  "bin": {
+    "portgraph2kgraph": "lib/cli.js"
+  },
   "scripts": {
     "test": "standard src/**/*.js && mocha --compilers js:babel-register",
     "build": "babel src -d lib",
