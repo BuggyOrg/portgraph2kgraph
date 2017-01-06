@@ -23,9 +23,11 @@ export function convertPort (port) {
 export function convertEdge (graph, edge) {
   var sourceHierarchy = false
   var targetHierarchy = false
-  if (Node.equal(Graph.parent(edge.from, graph), edge.to)) {
+  var parTo = Graph.parent(edge.to, graph)
+  var parFrom = Graph.parent(edge.from, graph)
+  if (parTo && Node.equal(parTo, edge.from)) {
     sourceHierarchy = true
-  } else if (Node.equal(Graph.parent(edge.from, graph), edge.to)) {
+  } else if (parFrom && Node.equal(parFrom, edge.to)) {
     targetHierarchy = true
   } else if (Node.equal(edge.from, edge.to)) {
     sourceHierarchy = true

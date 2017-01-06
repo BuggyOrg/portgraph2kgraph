@@ -2,8 +2,9 @@
 import yargs from 'yargs'
 import convert from './api'
 import {fromJSON} from '@buggyorg/graphtools'
-import getStdin from 'get-stdin'
+import cliExt from 'cli-ext'
 
+debugger
 var args = yargs
   .usage('Usage: cat graph.json | $0 or $0 --graph graph.json --out kgraph.json')
   .boolean('p')
@@ -17,11 +18,12 @@ var args = yargs
 
 const pp = (args.argv.p) ? (graph) => JSON.stringify(graph, null, 2) : JSON.stringify
 
-getStdin().then((graphString) => {
+cliExt.input(args.argv._[0]).then((graphString) => {
   var graph = fromJSON(JSON.parse(graphString))
+  debugger
   process.stdout.write(pp(convert(graph)))
 })
 .catch((err) => {
-  console.error('Error while processing graph.\n' + err)
+  console.error('Error while processing graph.\n', err.stack || err)
   process.exit(1)
 })
