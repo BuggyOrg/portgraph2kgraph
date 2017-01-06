@@ -26,9 +26,9 @@ export function convertEdge (graph, edge) {
   var parTo = Graph.parent(edge.to, graph)
   var parFrom = Graph.parent(edge.from, graph)
   if (parTo && Node.equal(parTo, edge.from)) {
-    sourceHierarchy = true
-  } else if (parFrom && Node.equal(parFrom, edge.to)) {
     targetHierarchy = true
+  } else if (parFrom && Node.equal(parFrom, edge.to)) {
+    sourceHierarchy = true
   } else if (Node.equal(edge.from, edge.to)) {
     sourceHierarchy = true
     targetHierarchy = true
@@ -54,7 +54,7 @@ export function convertGraph (graph) {
   var nodes = _(Graph.nodes(graph))
     .map(convertGraph)
     .value()
-  var edges = _(Graph.edges(graph))
+  var edges = _(graph.edges || [])
     // .map(_.partial(setEdgeParent, _, graph))
     .map(_.partial(convertEdge, graph))
     .value()
