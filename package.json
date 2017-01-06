@@ -1,6 +1,6 @@
 {
   "name": "@buggyorg/portgraph2kgraph",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Converter for buggy port graphs into the kgraph format that can be used to create graph visualizations via KLay.",
   "main": "lib/api.js",
   "bin": {
