@@ -19,7 +19,7 @@
   "author": "Maximilian Klein",
   "license": "MIT",
   "dependencies": {
-    "@buggyorg/graphtools": "0.4.0-pre.15",
+    "@buggyorg/graphtools": "^0.4.0-pre.18",
     "cli-ext": "^1.1.0",
     "get-stdin": "^5.0.1",
     "lodash": "^4.16.4",

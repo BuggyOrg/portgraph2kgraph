@@ -21,6 +21,7 @@ export function convertPort (port) {
 }
 
 export function convertEdge (graph, edge) {
+  if (edge.layer !== 'dataflow') return
   var sourceHierarchy = false
   var targetHierarchy = false
   var parTo = Graph.parent(edge.to, graph)
@@ -57,8 +58,9 @@ export function convertGraph (graph) {
   var edges = _(graph.edges || [])
     // .map(_.partial(setEdgeParent, _, graph))
     .map(_.partial(convertEdge, graph))
+    .compact()
     .value()
-  return {
+  const retGraph = {
     id: graph.id,
     labels: [{text: Node.component(graph) || Node.name(graph)}],
     children: nodes,
@@ -66,4 +68,12 @@ export function convertGraph (graph) {
     edges: edges,
     meta: Object.assign({}, graph.metaInformation, { style: _.get(graph, 'metaInformation.style') })
   }
+  if (Graph.CompoundPath.isRoot(graph.path)) {
+    return {
+      id: 'root',
+      children: [retGraph],
+      edges: []
+    }
+  }
+  return retGraph
 }
