@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 import yargs from 'yargs'
 import convert from './api'
 import {fromJSON} from '@buggyorg/graphtools'
