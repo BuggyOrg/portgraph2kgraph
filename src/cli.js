@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import yargs from 'yargs'
 import convert from './api'
-import {fromJSON} from '@buggyorg/graphtools'
+import {fromJSONUnsafe} from '@buggyorg/graphtools'
 import cliExt from 'cli-ext'
 
 var args = yargs
@@ -18,8 +18,9 @@ var args = yargs
 const pp = (args.argv.p) ? (graph) => JSON.stringify(graph, null, 2) : JSON.stringify
 
 cliExt.input(args.argv._[0]).then((graphString) => {
-  var graph = fromJSON(JSON.parse(graphString))
-  process.stdout.write(pp(convert(graph)))
+  var graph = fromJSONUnsafe(JSON.parse(graphString))
+  const conv = convert(graph)
+  process.stdout.write(pp(conv))
 })
 .catch((err) => {
   console.error('Error while processing graph.\n', err.stack || err)

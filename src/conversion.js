@@ -22,38 +22,42 @@ export function convertPort (port) {
 
 export function convertEdge (graph, edge) {
   if (edge.layer !== 'dataflow') return
-  var sourceHierarchy = false
-  var targetHierarchy = false
-  var parTo = Graph.parent(edge.to, graph)
-  var parFrom = Graph.parent(edge.from, graph)
-  if (parTo && Node.equal(parTo, edge.from)) {
-    targetHierarchy = true
-  } else if (parFrom && Node.equal(parFrom, edge.to)) {
-    sourceHierarchy = true
-  } else if (Node.equal(edge.from, edge.to)) {
-    sourceHierarchy = true
-    targetHierarchy = true
-  }
-  return {
-    id: Port.node(edge.from) + Port.node(edge.to),
-    source: Port.node(edge.from),
-    sourcePort: Port.node(edge.from) + '_' + Port.portName(edge.from) + ((targetHierarchy) ? '_in' : '_out'),
-    target: Port.node(edge.to),
-    targetPort: Port.node(edge.to) + '_' + Port.portName(edge.to) + ((sourceHierarchy) ? '_out' : '_in'),
-    meta: {
-      sourceType: Graph.port(edge.from, graph).type,
-      targetType: Graph.port(edge.to, graph).type,
-      sourcePort: edge.from,
-      targetPort: edge.to,
-      layer: edge.layer,
-      style: _.get(edge, 'value.meta.style')
+  try {
+    var sourceHierarchy = false
+    var targetHierarchy = false
+    var parTo = Graph.parent(edge.to, graph)
+    var parFrom = Graph.parent(edge.from, graph)
+    if (parTo && Node.equal(parTo, edge.from)) {
+      targetHierarchy = true
+    } else if (parFrom && Node.equal(parFrom, edge.to)) {
+      sourceHierarchy = true
+    } else if (Node.equal(edge.from, edge.to)) {
+      sourceHierarchy = true
+      targetHierarchy = true
     }
+    return {
+      id: Port.node(edge.from) + Port.node(edge.to),
+      source: Port.node(edge.from),
+      sourcePort: Port.node(edge.from) + '_' + Port.portName(edge.from) + ((targetHierarchy) ? '_in' : '_out'),
+      target: Port.node(edge.to),
+      targetPort: Port.node(edge.to) + '_' + Port.portName(edge.to) + ((sourceHierarchy) ? '_out' : '_in'),
+      meta: {
+        sourceType: Graph.port(edge.from, graph).type,
+        targetType: Graph.port(edge.to, graph).type,
+        sourcePort: edge.from,
+        targetPort: edge.to,
+        layer: edge.layer,
+        style: _.get(edge, 'value.meta.style')
+      }
+    }
+  } catch (err) {
+    return null
   }
 }
 
-export function convertGraph (graph) {
+function convertGraphInternal (graph) {
   var nodes = _(Graph.nodes(graph))
-    .map(convertGraph)
+    .map(convertGraphInternal)
     .value()
   var edges = _(graph.edges || [])
     // .map(_.partial(setEdgeParent, _, graph))
@@ -76,4 +80,8 @@ export function convertGraph (graph) {
     }
   }
   return retGraph
+}
+
+export function convertGraph (graph) {
+  return convertGraphInternal(graph)
 }
